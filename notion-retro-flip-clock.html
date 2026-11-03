@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retro Flip Clock</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 15px;
+  background: transparent;
+  font-family: Georgia, serif;
+}
+.clock-container {
+  background: #EAE0D1;
+  border-radius: 18px;
+  padding: 28px 15px;
+  text-align: center;
+  color: #65513D;
+}
+.clock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.group { display: flex; gap: 4px; }
+.digit-card {
+  position: relative;
+  width: clamp(35px, 10vw, 65px);
+  height: clamp(52px, 14vw, 82px);
+  background: #F8F2E9;
+  border-radius: 7px;
+  box-shadow: 0 4px 9px rgba(70, 52, 30, .13);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.digit-card::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background: #D9CBB9;
+  top: 50%;
+  left: 0;
+}
+.digit {
+  font-family: Georgia, serif;
+  font-size: clamp(29px, 8vw, 49px);
+  font-weight: bold;
+  color: #65513D;
+  transition: transform .25s ease, opacity .25s ease;
+}
+.digit-card.flip .digit {
+  transform: translateY(-5px);
+  opacity: .35;
+}
+.colon { font-size: 30px; color: #A18A70; padding: 0 1px; }
+.ampm {
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  align-self: center;
+  margin-left: 5px;
+  letter-spacing: 1px;
+}
+.date {
+  margin-top: 20px;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #907B63;
+  text-transform: uppercase;
+}
+.label {
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  letter-spacing: 4px;
+  margin-bottom: 17px;
+  color: #A18A70;
+}
+</style>
+</head>
+<body>
+<div class="clock-container">
+  <div class="label">LOCAL TIME</div>
+  <div class="clock">
+    <div class="group">
+      <div class="digit-card"><span class="digit" id="h1">0</span></div>
+      <div class="digit-card"><span class="digit" id="h2">0</span></div>
+    </div>
+    <span class="colon">:</span>
+    <div class="group">
+      <div class="digit-card"><span class="digit" id="m1">0</span></div>
+      <div class="digit-card"><span class="digit" id="m2">0</span></div>
+    </div>
+    <span class="colon">:</span>
+    <div class="group">
+      <div class="digit-card"><span class="digit" id="s1">0</span></div>
+      <div class="digit-card"><span class="digit" id="s2">0</span></div>
+    </div>
+    <span class="ampm" id="ampm">AM</span>
+  </div>
+  <div class="date" id="date"></div>
+</div>
+<script>
+const ids = ["h1","h2","m1","m2","s1","s2"];
+function updateClock() {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Bogota",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  }).formatToParts(now);
+  const get = type => parts.find(p => p.type === type).value;
+  const time = get("hour") + get("minute") + get("second");
+  ids.forEach((id, index) => {
+    const digit = document.getElementById(id);
+    if (digit.textContent !== time[index]) {
+      digit.textContent = time[index];
+      const card = digit.parentElement;
+      card.classList.remove("flip");
+      void card.offsetWidth;
+      card.classList.add("flip");
+      setTimeout(() => card.classList.remove("flip"), 250);
+    }
+  });
+  document.getElementById("ampm").textContent = get("dayPeriod");
+  document.getElementById("date").textContent =
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Bogota",
+      weekday: "long",
+      month: "long",
+      day: "numeric"
+    }).format(now);
+}
+updateClock();
+setInterval(updateClock, 1000);
+</script>
+</body>
+</html>
